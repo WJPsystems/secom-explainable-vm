@@ -1,0 +1,4 @@
+feature_id,pct_missing,variance,corr_with_target,mean_abs_shap,retained,notes
+Sensor_1,,,,,TRUE,Fill in during 01_data_screening.ipynb
+Sensor_2,,,,,TRUE,
+Sensor_3,,,,,FALSE,Example: dropped for >40% missingness
