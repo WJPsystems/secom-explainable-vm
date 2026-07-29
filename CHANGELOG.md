@@ -7,6 +7,70 @@ each notebook's "Notebook version" marker (in its first cell) exist so you
 can tell, at a glance, whether the copy you're looking at in Colab/GitHub is
 current, without needing to diff files by hand.
 
+## v11 -- 2026-07-29
+
+- **Real bug found from a clean v9 run: permutation importance in
+  `03_shap_analysis_rq2.ipynb` came back ~1e-17 (floating-point noise) for
+  every single feature.** Root cause: it evaluated `rq1_best_tree` -- which
+  RQ1 refits on 100% of the data -- on that SAME data. An unregularized
+  RandomForest (no `max_depth` cap) can essentially memorize 1,567 training
+  rows, so permuting any one feature barely hurts performance on data the
+  model has already seen. This wasn't a code bug, but genuinely wrong
+  methodology.
+- **Fix: `02_modeling_rq1.ipynb` now saves a second, genuinely-held-out
+  model** (`rq1_best_tree_holdout`, trained only on a fixed stratified 80/20
+  split saved as `rq1_holdout_split.json`) alongside the existing full-data
+  `rq1_best_tree` (kept as-is for SHAP's global-explanation use, which is
+  standard practice and doesn't need held-out data the way permutation
+  importance does). `03` now evaluates permutation importance with the
+  holdout model on the held-out 20% only.
+- **Implemented `04`'s previously-stubbed full-vs-reduced comparison**,
+  reusing the same shared holdout split: trains full-feature and reduced-
+  feature models on the train portion, evaluates both on the held-out test
+  portion, and reports three real statistical comparisons via new
+  functions in `src/metrics.py`:
+  - `bootstrap_auc_comparison()` -- a paired bootstrap substitute for
+    DeLong's test (documented reasoning for the substitution in the
+    docstring: simpler to verify correctly than re-deriving DeLong's
+    structural-component formula from scratch).
+  - `mcnemar_test()` -- continuity-corrected chi-square, with an exact
+    binomial fallback for small discordant-pair counts (<25).
+  - `cohens_h_two_proportion_test()` -- Cohen's h effect size + a
+    two-proportion z-test for accuracy comparison.
+  All three verified against hand-constructed known-answer cases (clearly-
+  different models detected as significant, identical/near-identical
+  models detected as not significant) before shipping, not just read
+  through.
+- Verified the full RQ1 -> RQ2 -> RQ3 artifact chain end-to-end with a
+  synthetic-data integration test (save holdout model/split in a RQ1-like
+  step, load and use them in RQ2-like and RQ3-like steps) -- confirmed
+  permutation importance is non-degenerate and matches SHAP's top features
+  on synthetic data where the true signal is known.
+
+## v10 -- 2026-07-29
+
+- **Real failure found: a notebook ran with pre-v9 code even after v9 was
+  correctly uploaded** (confirmed by cloning the live GitHub repo directly --
+  it was genuinely on v9). Root cause: Colab's **Runtime -> Restart session**
+  resets the Python kernel but does not wipe `/content` on disk -- unlike
+  **Disconnect and delete runtime**, which does. If `/content/secom-
+  explainable-vm` and the `.secom_setup_done` marker from an earlier,
+  pre-v9 session both survived a "Restart session," the v9 session-marker
+  logic would (correctly, by its prior design) skip `git pull` entirely,
+  leaving stale code in place.
+- **Fixed by un-bundling the two steps the marker was skipping together:**
+  `git pull` now always runs unconditionally (cheap, a few seconds) --
+  code can no longer go stale regardless of what state `/content` was left
+  in. Only `pip install` (the actually slow step) is still skipped when the
+  session marker is present. Verified with a simulation of the exact
+  failure scenario (marker present from a prior session) confirming
+  `git pull` now runs anyway.
+- Practical note for using Colab going forward: prefer **Runtime ->
+  Disconnect and delete runtime** over "Restart session" when starting a
+  genuinely new attempt, since it guarantees a fully clean VM -- this fix
+  makes stale code impossible either way, but a full disconnect avoids
+  relying on that fix at all.
+
 ## v9 -- 2026-07-29
 
 Three real bugs found from the first full end-to-end run (RQ1 result:
