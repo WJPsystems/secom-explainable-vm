@@ -7,6 +7,23 @@ each notebook's "Notebook version" marker (in its first cell) exist so you
 can tell, at a glance, whether the copy you're looking at in Colab/GitHub is
 current, without needing to diff files by hand.
 
+## v5 -- 2026-07-29
+
+- **Bug fix in the version-marker system itself.** The v3 "bump to v3"
+  script used `line.startswith("**Notebook version:**")`, which never
+  matched because the marker line actually started with a leading newline
+  character from how it was first inserted -- so 6 of 7 notebooks silently
+  kept showing "v1" in their intro cell even though their actual code was
+  correctly updated to v3. The script also printed a success message
+  unconditionally, regardless of whether a match was found, which is why
+  this went unnoticed until directly verified against the live GitHub repo.
+  Fixed with a substring check instead, and verified this time by
+  independently re-reading the file content after the edit, not just
+  trusting the script's own print statement.
+- No functional/code changes in this version -- only the version-marker
+  text itself was wrong; the underlying pipeline logic was already correct
+  as of v3.
+
 ## v4 -- 2026-07-29
 
 - Replaced the hidden `.gitkeep` placeholder files in `data/raw/`,
