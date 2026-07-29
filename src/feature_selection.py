@@ -23,6 +23,8 @@ from scipy.cluster.hierarchy import fcluster, linkage
 from scipy.spatial.distance import squareform
 from sklearn.linear_model import LogisticRegressionCV
 from sklearn.model_selection import StratifiedKFold
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 
 
 def cluster_correlated_features(X: pd.DataFrame, corr_threshold: float = 0.85) -> dict:
@@ -115,17 +117,30 @@ def lasso_cross_check(X: pd.DataFrame, y: pd.Series, random_state: int = 42) -> 
     Independent, methodologically different feature-selection cross-check.
     Fits L1-regularized logistic regression and returns the features with
     non-zero coefficients (Tibshirani, 1996).
+
+    Features are standardized first -- this is not optional. L1-penalized
+    liblinear on raw, unscaled sensor features (which here span wildly
+    different numeric ranges) converges extremely slowly or effectively
+    hangs: 50 fits (Cs=10 x cv=5) each fighting to converge on unscaled data
+    caused a real 1,800s timeout in practice before this fix. Standardizing
+    first is the actual fix, not a larger max_iter or fewer Cs candidates.
     """
-    model = LogisticRegressionCV(
-        Cs=10,
-        cv=5,
-        penalty="l1",
-        solver="liblinear",
-        class_weight="balanced",
-        random_state=random_state,
-        max_iter=5000,
-    )
-    model.fit(X, y)
+    pipeline = Pipeline([
+        ("scaler", StandardScaler()),
+        ("logreg_cv", LogisticRegressionCV(
+            Cs=10,
+            cv=5,
+            penalty="l1",
+            solver="liblinear",
+            class_weight="balanced",
+            random_state=random_state,
+            max_iter=1000,  # lower than before on purpose: with scaled data this
+                             # is plenty, and a lower ceiling fails fast/loud if
+                             # something is still wrong, instead of hanging silently.
+        )),
+    ])
+    pipeline.fit(X, y)
+    model = pipeline.named_steps["logreg_cv"]
     coefs = pd.Series(model.coef_.ravel(), index=X.columns)
     return coefs[coefs != 0].abs().sort_values(ascending=False).index.tolist()
 

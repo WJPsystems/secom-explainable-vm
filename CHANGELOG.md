@@ -7,6 +7,54 @@ each notebook's "Notebook version" marker (in its first cell) exist so you
 can tell, at a glance, whether the copy you're looking at in Colab/GitHub is
 current, without needing to diff files by hand.
 
+## v8 -- 2026-07-29
+
+- **Session-marker optimization**, requested a few turns back and delayed
+  until `04`'s timeout bug was fixed: the Colab setup cell now writes
+  `/content/.secom_setup_done` after the first successful `git pull` +
+  `pip install` in a session, and subsequent notebooks (e.g. `01`-`06`
+  opened right after `00_run_all` already set things up) check for it and
+  skip both steps if present. A brand new session (or a fresh clone) always
+  runs the full setup regardless, since the marker lives only in `/content`,
+  never in the repo -- verified with a standalone simulation of the control
+  flow across 4 scenarios (first run, 2nd/3rd run same session, new session
+  after restart) before shipping, not just a read-through.
+- Still prints the commit hash every time either way, so version
+  verification isn't affected by the skip.
+
+## v7 -- 2026-07-29
+
+- **Real bug fix: `04_feature_reduction_rq3.ipynb` timed out after 1,800s**
+  inside its LASSO cross-check step. Root cause: `lasso_cross_check()` in
+  `src/feature_selection.py` fit L1-penalized logistic regression
+  (`liblinear` solver) directly on raw, unscaled sensor features -- with
+  432 features on wildly different numeric scales, this converges
+  extremely slowly (50 fits: `Cs=10 x cv=5`, each fighting to converge).
+  Fixed by standardizing features first via an sklearn `Pipeline`
+  (`StandardScaler` -> `LogisticRegressionCV`); also lowered `max_iter`
+  from 5000 to 1000 so a future regression fails fast and loud instead of
+  hanging silently for 30 minutes.
+- Same latent issue existed in `02_modeling_rq1.ipynb`'s baseline
+  `LogisticRegression` (didn't time out there, but same root cause) --
+  fixed identically, wrapped in a `StandardScaler` Pipeline in both
+  `make_models()` and `refit_full()`. `predict_proba`/`.fit()` interfaces
+  are unchanged, so no other code needed to change.
+- `05` and `06` were correctly never exported to HTML after `04`'s failure
+  -- `00_run_all.ipynb` intentionally stops the whole run on first failure
+  and only exports notebooks that actually completed; this was expected
+  behavior, not a separate bug.
+
+## v6 -- 2026-07-29
+
+- **Free speedups, no effect on results:** added `n_jobs=-1` to every
+  RandomForest and XGBoost instantiation (`02`, `04`) and to `03`'s
+  `permutation_importance` call, so these use all available CPU cores
+  instead of a single one by default. Same computation, same numbers,
+  faster wall-clock time.
+- All 7 notebook version markers bumped to v6 and independently re-verified
+  by re-reading file content after the edit (not just trusting the script's
+  print output, per the v5 lesson).
+
 ## v5 -- 2026-07-29
 
 - **Bug fix in the version-marker system itself.** The v3 "bump to v3"
