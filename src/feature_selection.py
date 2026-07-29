@@ -57,10 +57,24 @@ def cluster_correlated_features(X: pd.DataFrame, corr_threshold: float = 0.85) -
     compete as a single cluster rather than splitting SHAP credit.
 
     Returns a dict mapping feature name -> cluster id.
+
+    NaN handling is not optional: a column can pass the GLOBAL variance
+    screening (computed over all 1,567 rows) but still be exactly constant
+    within one CV fold's ~80% training subset -- correlation is undefined
+    (0/0) for a constant column, and that NaN propagates through squareform
+    and crashes linkage() with "must contain only finite values" (a real
+    failure observed in practice, not a hypothetical). A fold-locally-
+    constant column carries no correlated signal to anything in that fold,
+    so treating its undefined correlations as 0 (maximally distant, i.e.
+    "not correlated") is the correct fix, not a workaround -- the diagonal
+    is then forced back to 1.0 so the resulting distance matrix still has
+    the required zero self-distance.
     """
-    corr = X.corr().abs()
-    distance = 1 - corr
-    condensed = squareform(distance.values, checks=False)
+    corr = X.corr().abs().fillna(0.0)
+    corr_values = corr.values.copy()  # .values can be a read-only view; copy before in-place mutation
+    np.fill_diagonal(corr_values, 1.0)
+    distance = 1 - corr_values
+    condensed = squareform(distance, checks=False)
     Z = linkage(condensed, method="average")
     cluster_ids = fcluster(Z, t=1 - corr_threshold, criterion="distance")
     return dict(zip(X.columns, cluster_ids))

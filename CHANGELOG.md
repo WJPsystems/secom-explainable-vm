@@ -7,6 +7,33 @@ each notebook's "Notebook version" marker (in its first cell) exist so you
 can tell, at a glance, whether the copy you're looking at in Colab/GitHub is
 current, without needing to diff files by hand.
 
+## v12 -- 2026-07-29
+
+- **Real bug from a clean v11 run: `04` crashed with `ValueError: The
+  condensed distance matrix must contain only finite values`** inside
+  `cluster_correlated_features()`. Root cause: a column can pass the
+  GLOBAL variance screening (over all 1,567 rows) but still be exactly
+  constant within one CV fold's ~80% training subset -- correlation is
+  undefined (0/0) for a constant column, producing `NaN` that crashed
+  `scipy.cluster.hierarchy.linkage()`. Reproduced directly with a synthetic
+  fold-locally-constant column before fixing, and re-tested after.
+  Fixed by treating undefined (NaN) correlations as 0 (maximally distant --
+  a locally-constant column carries no correlated signal to anything in
+  that fold, which is the correct interpretation, not a workaround), with
+  the diagonal explicitly forced back to 1.0 so the resulting distance
+  matrix still has proper zero self-distance.
+- **A second bug surfaced while testing the first fix**: naively doing
+  `np.fill_diagonal(corr.values, 1.0)` failed with "underlying array is
+  read-only" -- pandas can return a read-only view from `.values` in some
+  cases. Fixed by explicitly copying before in-place mutation.
+- Verified with: (1) a direct reproduction of the original crash on an
+  isolated synthetic constant column, confirmed fixed; (2) confirmation
+  that normal, non-degenerate correlation clustering still correctly groups
+  genuinely correlated features and separates unrelated ones; (3) a full
+  `nested_cv_shap_selection()` run with a near-constant column; (4) the
+  complete RQ1 -> RQ2 -> RQ3 synthetic integration test re-run end-to-end
+  with this fix in place.
+
 ## v11 -- 2026-07-29
 
 - **Real bug found from a clean v9 run: permutation importance in
