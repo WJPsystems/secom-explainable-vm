@@ -7,6 +7,40 @@ each notebook's "Notebook version" marker (in its first cell) exist so you
 can tell, at a glance, whether the copy you're looking at in Colab/GitHub is
 current, without needing to diff files by hand.
 
+## v9 -- 2026-07-29
+
+Three real bugs found from the first full end-to-end run (RQ1 result:
+RandomForest won overall, TabNet ranked last of 4 by AUC-ROC -- but `03` and
+`04` crashed partway through, so this needs a clean re-run to confirm).
+
+- **SHAP shape bug (real `ValueError`, not cosmetic):** `shap.TreeExplainer`
+  returns a single 3D array `(samples, features, classes)` for
+  `RandomForestClassifier` in the shap version actually installed in Colab --
+  the old code only checked for the older list-of-per-class-arrays
+  convention, so `np.abs(sv).mean(axis=0)` produced a 2D result and crashed
+  building a pandas Series from it. Fixed with a new shared
+  `extract_positive_class_shap()` helper in `src/feature_selection.py`
+  handling all 3 known shap output conventions (list, 3D array, already-2D),
+  used by both `nested_cv_shap_selection()` and `03_shap_analysis_rq2.ipynb`'s
+  inline SHAP cell. Verified against a real `RandomForestClassifier` +
+  `TreeExplainer` reproduction of the exact bug, not just unit-style mocks.
+- **LASSO selecting zero features:** `LogisticRegressionCV`'s default
+  internal scoring is plain accuracy; on this ~93.4%-majority-class dataset,
+  an all-zero-coefficient (majority-class-only) model already scores ~93%
+  trivially, so C-selection kept picking maximum regularization every time.
+  Fixed by setting `scoring="roc_auc"`. Verified on synthetic imbalanced
+  data (6.67% positive, matching SECOM's real rate) -- selected the actually-
+  predictive features instead of zero.
+- **`00_run_all.ipynb`'s `--allow-errors` flag was masking real failures.**
+  It was only meant to tolerate each notebook's own trailing live-export
+  cell failing in batch mode, but it suppressed *any* cell error, which is
+  why `03` and `04` were reported `[OK]` despite the SHAP crash above
+  happening inside them. Fixed properly: each notebook's export cell now
+  checks whether `_message.blocking_request` returned `None` (the actual
+  batch-mode signal) and skips gracefully instead of raising, so
+  `--allow-errors` is no longer needed at all and has been removed --
+  `00_run_all` now fails loudly and correctly on genuine errors.
+
 ## v8 -- 2026-07-29
 
 - **Session-marker optimization**, requested a few turns back and delayed

@@ -27,6 +27,29 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 
+def extract_positive_class_shap(shap_values) -> np.ndarray:
+    """
+    Normalize shap.TreeExplainer's output to a plain (n_samples, n_features)
+    array of positive-class SHAP values, regardless of which output
+    convention the installed shap version uses for binary classification:
+
+    1. A list of 2 arrays, one per class (older shap versions) -- index 1
+       is the positive class.
+    2. A single 3D array of shape (n_samples, n_features, n_classes)
+       (newer shap versions, observed in practice for RandomForestClassifier
+       and the reason this function exists -- the older list-only check
+       caused a real ValueError: "Data must be 1-dimensional, got ndarray
+       of shape (432, 2)").
+    3. A single 2D array of shape (n_samples, n_features) already (some
+       models/versions return this directly for binary classification).
+    """
+    if isinstance(shap_values, list):
+        return shap_values[1]
+    if isinstance(shap_values, np.ndarray) and shap_values.ndim == 3:
+        return shap_values[:, :, 1]
+    return shap_values
+
+
 def cluster_correlated_features(X: pd.DataFrame, corr_threshold: float = 0.85) -> dict:
     """
     Hierarchically cluster features by pairwise correlation so that
@@ -90,8 +113,7 @@ def nested_cv_shap_selection(
 
         explainer = shap.TreeExplainer(model)
         shap_values = explainer.shap_values(X_train)
-        # Handle both single-array and list-of-arrays SHAP outputs
-        sv = shap_values[1] if isinstance(shap_values, list) else shap_values
+        sv = extract_positive_class_shap(shap_values)
         mean_abs_shap = pd.Series(np.abs(sv).mean(axis=0), index=X_train.columns)
 
         candidates = representative_per_cluster(X_train, clusters, mean_abs_shap)
@@ -124,6 +146,14 @@ def lasso_cross_check(X: pd.DataFrame, y: pd.Series, random_state: int = 42) -> 
     hangs: 50 fits (Cs=10 x cv=5) each fighting to converge on unscaled data
     caused a real 1,800s timeout in practice before this fix. Standardizing
     first is the actual fix, not a larger max_iter or fewer Cs candidates.
+
+    scoring="roc_auc" is also not optional. LogisticRegressionCV's default
+    internal scoring is plain accuracy, and on this ~93.4%-majority-class
+    dataset an all-zero-coefficient (majority-class-only) model already
+    scores ~93% accuracy trivially -- in practice this caused the CV
+    selection to pick the most-regularized candidate and return zero
+    selected features every time. AUC-ROC rewards actual discrimination
+    between classes instead of raw accuracy, which fixes this.
     """
     pipeline = Pipeline([
         ("scaler", StandardScaler()),
@@ -137,6 +167,7 @@ def lasso_cross_check(X: pd.DataFrame, y: pd.Series, random_state: int = 42) -> 
             max_iter=1000,  # lower than before on purpose: with scaled data this
                              # is plenty, and a lower ceiling fails fast/loud if
                              # something is still wrong, instead of hanging silently.
+            scoring="roc_auc",
         )),
     ])
     pipeline.fit(X, y)
