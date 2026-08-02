@@ -7,7 +7,7 @@ in the capstone synopsis (docs/synopsis.docx, Analytic Approach section).
 
 import numpy as np
 from scipy.stats import binom, chi2, norm
-from sklearn.metrics import confusion_matrix, matthews_corrcoef, roc_auc_score
+from sklearn.metrics import confusion_matrix, matthews_corrcoef, precision_recall_curve, roc_auc_score
 
 
 def balanced_error_rate(y_true, y_pred) -> float:
@@ -131,3 +131,34 @@ def cohens_h_two_proportion_test(p1: float, n1: int, p2: float, n2: int) -> dict
     z = (p1 - p2) / se if se > 0 else 0.0
     p_value = 2 * (1 - norm.cdf(abs(z)))
     return {"cohens_h": h, "z": z, "p_value": p_value}
+
+
+def find_f1_optimal_threshold(y_true, probs) -> dict:
+    """
+    Sweep thresholds via the precision-recall curve and return the one that
+    maximizes F1. Intended to be used with genuinely out-of-fold
+    probabilities (e.g. RQ1's 5-fold CV OOF predictions), not probabilities
+    from a single train/test split, so the chosen threshold isn't tuned to
+    the same data it's later evaluated on.
+
+    Guards a real (if intermittent) sklearn gotcha: precision_recall_curve
+    returns one fewer threshold than precision/recall points -- its last
+    precision/recall pair corresponds to classifying everything positive
+    and has no associated threshold. Naively taking
+    thresholds[argmax(f1_scores)] over the full-length arrays can raise
+    IndexError if that last (threshold-less) point happens to be the F1
+    maximum. Confirmed this is a real edge case (not just a hypothetical)
+    before guarding it; the guard costs nothing in the normal case.
+    """
+    precision, recall, thresholds = precision_recall_curve(y_true, probs)
+    precision, recall = precision[:-1], recall[:-1]  # drop the threshold-less last point
+
+    f1_scores = 2 * (precision * recall) / (precision + recall + 1e-12)
+    best_idx = int(np.argmax(f1_scores))
+
+    return {
+        "threshold": float(thresholds[best_idx]),
+        "f1_at_threshold": float(f1_scores[best_idx]),
+        "precision_at_threshold": float(precision[best_idx]),
+        "recall_at_threshold": float(recall[best_idx]),
+    }

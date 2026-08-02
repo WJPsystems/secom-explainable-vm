@@ -7,6 +7,44 @@ each notebook's "Notebook version" marker (in its first cell) exist so you
 can tell, at a glance, whether the copy you're looking at in Colab/GitHub is
 current, without needing to diff files by hand.
 
+## v16 -- 2026-07-29
+
+- **Threshold calibration implemented** (Step 5 in `04_feature_reduction_rq3.ipynb`),
+  addressing the confirmed finding that both full and reduced models predict
+  "pass" for every held-out wafer at the default 0.5 threshold (identical
+  accuracy, Cohen's h = 0, McNemar's degenerate) despite real discriminative
+  power (AUC-ROC 0.77/0.80).
+- **Fixed a real gap in an externally-proposed implementation plan before
+  building on it**: the plan assumed `02`'s in-memory `oof_probs` variable
+  would be accessible from `04` ("assuming they're saved as an artifact...
+  let's assume it's saved") -- verified this was false. Each notebook runs
+  as a fully separate kernel process (even within a single `00_run_all`
+  run via `nbconvert --execute`), so nothing in `02`'s memory is visible to
+  `04` regardless of execution mode. Fixed by having `02` explicitly persist
+  the best tree model's out-of-fold probabilities as a new artifact
+  (`rq1_oof_probs.json`), which `04` now loads.
+- **Added `find_f1_optimal_threshold()`** to `src/metrics.py`, sweeping
+  `precision_recall_curve`'s output for the F1-maximizing threshold. Guards
+  a real (confirmed, not hypothetical) sklearn edge case: the last
+  precision/recall pair has no corresponding threshold, and naively
+  indexing `thresholds[argmax(f1_scores)]` over the full-length arrays can
+  raise `IndexError` if that threshold-less point happens to be the F1
+  maximum -- verified this is a real risk, not just theoretical, before
+  adding the guard (slicing to the threshold-having range before argmax).
+- The SAME tuned threshold is applied to both the full and reduced models
+  in `04`, deliberately, so the full-vs-reduced comparison isn't confounded
+  with separately tuning a threshold per model.
+- Verified with: a targeted test on SECOM-like synthetic imbalance data
+  (recall jumping from 17% to 48% at the tuned vs. default threshold, AUC-
+  ROC unchanged), and a full `02`-save -> `04`-load integration test that
+  reproduces the exact real-world pattern (precision/recall/F1=0, BER=0.5
+  at 0.5 threshold; sensible numbers at the tuned threshold).
+- Documented the cost-sensitive threshold (`cost_FP / (cost_FP + cost_FN)`)
+  as the more defensible alternative if the fab can state a real cost
+  ratio, in the new step's markdown explanation -- not computed here since
+  no cost ratio has been specified, but flagged as the better answer if one
+  becomes available.
+
 ## v15 -- 2026-07-29
 
 - **Real bug found from a fully clean v14 run (all 6 notebooks completed):
