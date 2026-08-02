@@ -7,6 +7,30 @@ each notebook's "Notebook version" marker (in its first cell) exist so you
 can tell, at a glance, whether the copy you're looking at in Colab/GitHub is
 current, without needing to diff files by hand.
 
+## v13 -- 2026-07-29
+
+- **v12's fix for the `cluster_correlated_features()` NaN crash was
+  insufficient -- confirmed on a genuine v12 run, not a stale-session
+  issue.** Replaced with a three-layer fix: (1) drop fold-locally-constant
+  columns entirely before computing correlations (more principled than
+  patching their correlation value, since such a column has no correlated
+  signal to cluster in that fold), (2) keep `fillna(0)` + forced diagonal
+  as a safety net for near-constant edge cases, (3) a defensive
+  `np.isfinite` check immediately before `linkage()` as a last-resort net.
+- **Found and fixed a second, silent bug while combining these fixes**:
+  the return statement zipped cluster IDs with the original `X.columns`
+  instead of `X_varying.columns` (the list actually clustered, after
+  dropping constants) -- with a constant column anywhere but the end of
+  the list, this would have silently misaligned column names to the wrong
+  cluster IDs with no crash and no warning. Caught by a dedicated test
+  (dropping a column mid-list, then asserting two genuinely-correlated
+  features still land in the same cluster) rather than by inspection.
+- Verified with 4 tests before shipping: original crash reproduction (now
+  correctly drops rather than patches), normal clustering unaffected,
+  multiple simultaneous constant columns, and the column-misalignment
+  check specifically. Also re-ran the full `nested_cv_shap_selection()`
+  reproduction from v12 to confirm no regression.
+
 ## v12 -- 2026-07-29
 
 - **Real bug from a clean v11 run: `04` crashed with `ValueError: The

@@ -56,28 +56,42 @@ def cluster_correlated_features(X: pd.DataFrame, corr_threshold: float = 0.85) -
     near-duplicate sensors (e.g. three temperature probes on one chamber)
     compete as a single cluster rather than splitting SHAP credit.
 
-    Returns a dict mapping feature name -> cluster id.
+    Returns a dict mapping feature name -> cluster id. Columns dropped as
+    fold-locally-constant (see below) simply won't appear as keys -- callers
+    (representative_per_cluster) already only iterate over what's present,
+    so this is safe without further changes downstream.
 
-    NaN handling is not optional: a column can pass the GLOBAL variance
-    screening (computed over all 1,567 rows) but still be exactly constant
-    within one CV fold's ~80% training subset -- correlation is undefined
-    (0/0) for a constant column, and that NaN propagates through squareform
-    and crashes linkage() with "must contain only finite values" (a real
-    failure observed in practice, not a hypothetical). A fold-locally-
-    constant column carries no correlated signal to anything in that fold,
-    so treating its undefined correlations as 0 (maximally distant, i.e.
-    "not correlated") is the correct fix, not a workaround -- the diagonal
-    is then forced back to 1.0 so the resulting distance matrix still has
-    the required zero self-distance.
+    Three layers of defense against the NaN-correlation crash, in order:
+    1. Constant-column dropping (primary fix): a column can pass the GLOBAL
+       variance screening (over all 1,567 rows) but still be exactly
+       constant within one CV fold's ~80% training subset -- correlation
+       is undefined (0/0) for a constant column. Dropping such columns
+       before computing correlations is more principled than keeping them
+       with a patched-up correlation value, since a fold-locally-constant
+       feature genuinely has no correlated signal to cluster in this fold.
+    2. fillna(0) + forced diagonal (safety net): catches any remaining NaN
+       from edge cases short of exact constancy (e.g. floating-point noise
+       producing near-zero variance that still divides badly).
+    3. np.isfinite check immediately before linkage() (last-resort net):
+       if anything non-finite still slips through, replace it rather than
+       let scipy raise -- this should be unreachable given layers 1-2, but
+       costs nothing and fails safe instead of crashing a multi-minute run.
     """
-    corr = X.corr().abs().fillna(0.0)
+    constant_cols = X.columns[X.nunique() <= 1]
+    X_varying = X.drop(columns=constant_cols) if len(constant_cols) else X
+
+    corr = X_varying.corr().abs().fillna(0.0)
     corr_values = corr.values.copy()  # .values can be a read-only view; copy before in-place mutation
     np.fill_diagonal(corr_values, 1.0)
     distance = 1 - corr_values
+
     condensed = squareform(distance, checks=False)
+    if not np.isfinite(condensed).all():
+        condensed = np.nan_to_num(condensed, nan=0.0, posinf=1.0, neginf=0.0)
+
     Z = linkage(condensed, method="average")
     cluster_ids = fcluster(Z, t=1 - corr_threshold, criterion="distance")
-    return dict(zip(X.columns, cluster_ids))
+    return dict(zip(X_varying.columns, cluster_ids))
 
 
 def representative_per_cluster(X: pd.DataFrame, clusters: dict, importances: pd.Series) -> list[str]:
