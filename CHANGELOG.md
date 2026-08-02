@@ -7,6 +7,36 @@ each notebook's "Notebook version" marker (in its first cell) exist so you
 can tell, at a glance, whether the copy you're looking at in Colab/GitHub is
 current, without needing to diff files by hand.
 
+## v15 -- 2026-07-29
+
+- **Real bug found from a fully clean v14 run (all 6 notebooks completed):
+  `04`'s full-vs-reduced accuracy comparison came back exactly 0.0000 for
+  both models**, with McNemar's test showing "degenerate, no discordant
+  pairs." The impossible-looking exact zero (not ~93%, the majority-class
+  baseline one would expect) was the tell.
+- **Root cause: `load_raw()` returned SECOM's raw `{-1, 1}` label encoding.**
+  Only `02_modeling_rq1.ipynb` remapped this locally to `{0, 1}` before
+  training; `03` and `04` called `load_raw()` directly and never remapped,
+  so their `y` stayed in `{-1, 1}` while the saved models (trained in `02`
+  on 0/1 labels) predict in `{0, 1}`. Any direct equality comparison
+  between the two (accuracy, McNemar's) silently breaks -- confirmed by
+  reproducing the exact 0.0000 result with synthetic data using the same
+  mismatched encoding.
+- **AUC-ROC-based results are confirmed NOT affected** -- verified directly
+  that `sklearn.metrics.roc_auc_score` treats the larger label value as
+  positive regardless of whether it's `{-1,1}` or `{0,1}` encoded, so RQ1's
+  model comparison, `03`'s permutation importance, and `04`'s AUC-ROC
+  comparison (0.7670 full / 0.8003 reduced) all remain valid as reported.
+- **Fixed centrally in `load_raw()`** (`src/preprocessing.py`) rather than
+  patching each notebook separately -- that per-notebook inconsistency
+  (`02` remembered to remap, `03`/`04` didn't) is what caused the bug, so
+  centralizing it prevents the same class of bug from recurring in `05`/
+  `06` once those are built out. `02`'s existing local remap line is now
+  redundant but confirmed harmless (idempotent on already-0/1 labels).
+- Verified end-to-end with a realistic reproduction: fit/predict/compare
+  using the corrected encoding produces a sensible ~95% accuracy on
+  synthetic data, versus the broken 0.0000 with mismatched encoding.
+
 ## v14 -- 2026-07-29
 
 - **v13's fix resolved the NaN crash but exposed a second, distinct

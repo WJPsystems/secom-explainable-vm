@@ -21,6 +21,23 @@ MODEL_READY_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def load_raw() -> tuple[pd.DataFrame, pd.Series]:
+    """
+    Returns (features, labels) with labels remapped to {0, 1} (1 = fail,
+    0 = pass), NOT SECOM's raw {-1, 1} encoding.
+
+    This remapping used to happen only inside 02_modeling_rq1.ipynb's own
+    cell, not here -- 03/04 called load_raw() directly and got raw {-1, 1}
+    labels while using models trained (in 02) on 0/1 labels. AUC-ROC is
+    unaffected by this (sklearn treats the larger label value as positive
+    either way), but any direct equality comparison -- accuracy, McNemar's
+    test -- silently breaks: {0,1}-encoded predictions almost never equal
+    {-1,1}-encoded true labels even when the underlying prediction is
+    correct. This produced a real, confirmed bug: 04's full-vs-reduced
+    accuracy comparison came back exactly 0.0000/0.0000 on real data.
+    Centralizing the remap here, rather than requiring every notebook to
+    remember to do it locally, is the actual fix -- that inconsistency is
+    what caused the bug in the first place.
+    """
     features_path = RAW_DIR / "secom_features.csv"
     labels_path = RAW_DIR / "secom_labels.csv"
 
@@ -32,6 +49,7 @@ def load_raw() -> tuple[pd.DataFrame, pd.Series]:
 
     features = pd.read_csv(features_path)
     labels = pd.read_csv(labels_path).squeeze("columns")
+    labels = (labels == 1).astype(int)
     return features, labels
 
 
