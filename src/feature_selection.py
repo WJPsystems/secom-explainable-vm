@@ -61,21 +61,30 @@ def cluster_correlated_features(X: pd.DataFrame, corr_threshold: float = 0.85) -
     (representative_per_cluster) already only iterate over what's present,
     so this is safe without further changes downstream.
 
-    Three layers of defense against the NaN-correlation crash, in order:
-    1. Constant-column dropping (primary fix): a column can pass the GLOBAL
-       variance screening (over all 1,567 rows) but still be exactly
-       constant within one CV fold's ~80% training subset -- correlation
-       is undefined (0/0) for a constant column. Dropping such columns
-       before computing correlations is more principled than keeping them
-       with a patched-up correlation value, since a fold-locally-constant
-       feature genuinely has no correlated signal to cluster in this fold.
-    2. fillna(0) + forced diagonal (safety net): catches any remaining NaN
-       from edge cases short of exact constancy (e.g. floating-point noise
-       producing near-zero variance that still divides badly).
-    3. np.isfinite check immediately before linkage() (last-resort net):
-       if anything non-finite still slips through, replace it rather than
-       let scipy raise -- this should be unreachable given layers 1-2, but
-       costs nothing and fails safe instead of crashing a multi-minute run.
+    Five layers of defense, in order, against two distinct numerical
+    failures observed in practice on real SECOM folds (a NaN crash in
+    linkage(), then a separate negative-distance crash in fcluster()):
+    1. Constant-column dropping (primary NaN fix): a column can pass the
+       GLOBAL variance screening (over all 1,567 rows) but still be
+       exactly constant within one CV fold's ~80% training subset --
+       correlation is undefined (0/0) for a constant column. Dropping such
+       columns before computing correlations is more principled than
+       keeping them with a patched-up correlation value.
+    2. fillna(0) + forced diagonal (NaN safety net): catches any remaining
+       NaN short of exact constancy.
+    3. np.isfinite check before linkage() (NaN last-resort net).
+    4. Clamping distance to [0, None] before linkage(): guards against the
+       input distance matrix containing tiny negative values.
+    5. Clamping Z's merge-height column to [0, None] after linkage(),
+       before fcluster(): this is the layer that actually matters here --
+       confirmed by deliberately constructing a Z matrix with a tiny
+       negative merge height and reproducing scipy's exact "Linkage 'Z'
+       contains negative distances" error, then confirming this clamp
+       resolves it. Average-linkage's recursive merge-height computation
+       can produce a tiny negative value from floating-point rounding
+       across many merges even when every input distance was already
+       non-negative, so layer 4 alone is not guaranteed sufficient -- this
+       is why both layers are present rather than just the input-side one.
     """
     constant_cols = X.columns[X.nunique() <= 1]
     X_varying = X.drop(columns=constant_cols) if len(constant_cols) else X
@@ -84,12 +93,15 @@ def cluster_correlated_features(X: pd.DataFrame, corr_threshold: float = 0.85) -
     corr_values = corr.values.copy()  # .values can be a read-only view; copy before in-place mutation
     np.fill_diagonal(corr_values, 1.0)
     distance = 1 - corr_values
+    distance = np.clip(distance, 0, None)  # layer 4: guard the input side
 
     condensed = squareform(distance, checks=False)
     if not np.isfinite(condensed).all():
         condensed = np.nan_to_num(condensed, nan=0.0, posinf=1.0, neginf=0.0)
 
     Z = linkage(condensed, method="average")
+    Z[:, 2] = np.clip(Z[:, 2], 0, None)  # layer 5: guard linkage's own output
+
     cluster_ids = fcluster(Z, t=1 - corr_threshold, criterion="distance")
     return dict(zip(X_varying.columns, cluster_ids))
 

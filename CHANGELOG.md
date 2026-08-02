@@ -7,6 +7,32 @@ each notebook's "Notebook version" marker (in its first cell) exist so you
 can tell, at a glance, whether the copy you're looking at in Colab/GitHub is
 current, without needing to diff files by hand.
 
+## v14 -- 2026-07-29
+
+- **v13's fix resolved the NaN crash but exposed a second, distinct
+  numerical bug: `ValueError: Linkage 'Z' contains negative distances`**,
+  raised by `fcluster()` on a real v13 run. Investigated rather than
+  assumed: stress-tested whether `pandas.corr()` itself can exceed 1.0
+  (2,000 trials with perfectly-correlated synthetic columns -- never
+  observed), so the likely source is average-linkage's own recursive
+  merge-height computation producing a tiny negative value from floating-
+  point rounding, not necessarily the input distances. Confirmed this by
+  deliberately constructing a `Z` matrix with a `-1e-15` merge height and
+  reproducing scipy's exact error message, then confirming a fix resolves it.
+- **Fixed with two additional defense layers** (five total now):
+  `distance = np.clip(distance, 0, None)` before `linkage()` (guards the
+  input side, addresses the originally-proposed fix), and
+  `Z[:, 2] = np.clip(Z[:, 2], 0, None)` after `linkage()`, before
+  `fcluster()` (guards linkage's own output -- this is the layer that
+  actually matters for this specific failure, confirmed by the
+  deliberately-constructed reproduction above).
+- Re-ran the full test suite from v12/v13 (constant-column dropping,
+  normal clustering correctness, multiple constant columns, no column/
+  cluster-id misalignment) plus a new large-scale test (200 features, 25
+  underlying correlated factor groups, near-duplicate columns) confirming
+  25 clusters form correctly -- and re-ran the full
+  `nested_cv_shap_selection()` reproduction. All pass.
+
 ## v13 -- 2026-07-29
 
 - **v12's fix for the `cluster_correlated_features()` NaN crash was
