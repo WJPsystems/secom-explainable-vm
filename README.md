@@ -27,6 +27,21 @@ separate download.
 - 1,567 wafers, 591 continuous sensor features, binary label (-1 = pass, 1 = fail)
 - 104 fail cases (~6.6%) — significant class imbalance
 
+**On `PLACEHOLDER.md` files in `data/raw/`, `data/model_ready/`, and
+`data/artifacts/`:** these exist only so Git tracks the otherwise-empty
+folders before any pipeline run. Once real files are uploaded to a folder,
+delete that folder's `PLACEHOLDER.md` at the same time — keeping it
+alongside genuine data is just clutter once it's served its purpose.
+
+**On HTML run exports and synopsis updates not appearing on GitHub
+automatically:** nothing in this pipeline has write access to push to
+GitHub — not Colab, not the tools used to edit this repo. Every update
+(code fixes, synopsis revisions, HTML exports) has to be manually
+downloaded and re-uploaded, the same way the code itself gets updated. For
+HTML exports specifically, `00_run_all.ipynb`'s final cells download all
+six as one zip — upload that zip's contents to a folder such as
+`docs/run_exports/` if you want them version-controlled.
+
 ## Repository structure
 
 ```

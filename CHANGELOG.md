@@ -7,6 +7,43 @@ each notebook's "Notebook version" marker (in its first cell) exist so you
 can tell, at a glance, whether the copy you're looking at in Colab/GitHub is
 current, without needing to diff files by hand.
 
+## v22 -- 2026-08-02
+
+- **Synopsis updated with the Isolation Forest robustness check's real
+  results**: flagged 17/314 (5.4%) held-out wafers as anomalous; caught 0
+  of the 7 real failures the supervised model missed at its tuned
+  threshold. Reported as an honest null result (with the caveat that 7
+  missed cases gives very little statistical power either way), not
+  omitted or spun. Preliminary Results section now covers RQ1-RQ4 plus this
+  robustness check -- everything with real code has real results reported.
+- **README documents two workflow realities that were previously only
+  explained in chat**: (1) `PLACEHOLDER.md` files should be deleted once
+  real data is uploaded to a folder, rather than left alongside it; (2)
+  nothing in this pipeline (Colab, or the tools used to edit this repo)
+  has write access to push to GitHub -- HTML exports and synopsis updates
+  require manual download/upload, same as code changes. Documented
+  `00_run_all.ipynb`'s existing "download all HTML as zip" cell as the
+  path to getting run exports out of Colab if they're wanted in the repo.
+
+## v21 -- 2026-08-02
+
+- **First fully clean, real-data run across all six notebooks confirmed**
+  (v20's two fixes -- `data/model_ready/` population and the MLP scaling
+  fix -- both verified working on actual SECOM data, not just synthetic
+  tests). No notebook code changed in this version; only `docs/synopsis.docx`.
+- **Synopsis updated with real RQ4 results**: TabNet's own attention
+  explanation is negatively correlated with SHAP (mean Spearman -0.1681,
+  top-3 agreement 10%), while the MLP control's Integrated Gradients
+  agrees strongly with SHAP (0.8479, top-3 agreement 35%) -- a clear,
+  reportable answer to "Is TabNet's Attention Actually Trustworthy?" (no).
+  Documented that an earlier run's MLP results were discarded (diverged/
+  non-learning network, fixed in v19-v20) rather than folded into this
+  number.
+- Preliminary Results section now covers RQ1-RQ4 with real data; the
+  Isolation Forest robustness check's results (from `06_anomaly_safety_net.ipynb`)
+  still to be added -- it's an exploratory check per the synopsis's
+  "Robustness Consideration" section, not a numbered RQ.
+
 ## v20 -- 2026-08-02
 
 - **Real bug found: `data/model_ready/` was never populated by a v18 run**
