@@ -7,6 +7,63 @@ each notebook's "Notebook version" marker (in its first cell) exist so you
 can tell, at a glance, whether the copy you're looking at in Colab/GitHub is
 current, without needing to diff files by hand.
 
+## v20 -- 2026-08-02
+
+- **Real bug found: `data/model_ready/` was never populated by a v18 run**
+  (only `raw/` and `artifacts/` appeared in the downloaded zip). Root
+  cause: `run_screening_pipeline()` -- the only code that writes to
+  `data/model_ready/` -- was only reachable via
+  `if __name__ == "__main__":`, i.e. running `python src/preprocessing.py`
+  directly, which nothing in this notebook-based pipeline ever does. This
+  was architecturally orphaned from the start, not a "hasn't run yet" gap.
+- **Fixed by calling `run_screening_pipeline()` explicitly in
+  `01_data_screening.ipynb`.** Confirmed this doesn't introduce a second,
+  inconsistent train/test split: `stratified_split()` uses the identical
+  parameters (`test_size=0.2, random_state=42, stratify=y`) as RQ1's
+  index-based holdout split used everywhere else in the pipeline -- this
+  materializes that same split as CSV files for direct inspection, it
+  doesn't compete with it.
+- Verified the underlying screen/split/write logic directly (synthetic
+  data, temp directory) before wiring it in.
+- `00_run_all.ipynb`'s existing data-download cell already iterates over
+  all three `data/` subfolders, so no changes needed there -- it will pick
+  up the newly-populated `model_ready/` files automatically on the next run.
+
+## v19 -- 2026-07-29
+
+- **Real bug found from `05`'s first run against actual SECOM data**: the
+  MLP control's training loss exploded from 2.22 to 174.23 and then stayed
+  *exactly* flat for 100+ epochs -- a saturated/dead network, not a trained
+  model. This silently produced garbage explanations: MLP's SHAP-vs-
+  Integrated-Gradients agreement came back as exactly 0.0000, and a
+  `ConstantInputWarning` confirmed the model's output barely varied with
+  input at all. This invalidated the RQ4 conclusion drawn from that run,
+  since the "control" the comparison depends on was broken.
+- **Root cause, confirmed by direct reproduction**: the MLP was trained on
+  raw, unscaled SECOM features (which span wildly different numeric
+  ranges -- the same issue that broke LASSO earlier in this project).
+  TabNet handles this internally; a hand-built PyTorch MLP does not.
+  Reproduced the exact failure pattern (loss explodes and flatlines
+  immediately) with synthetic SECOM-scale features, then confirmed the fix
+  resolves it on the same adversarial data (MLP reaches 95.6% train
+  accuracy with smoothly decreasing loss instead).
+- **Fix, three parts**: (1) `StandardScaler` fit on the training split,
+  applied to both train and test -- not fit separately on test, which
+  would leak test statistics into the transform; (2) switched from
+  `Sigmoid()` + `BCELoss` to raw logits + `BCEWithLogitsLoss` (more
+  numerically stable) and lowered the learning rate from 0.01 to 0.001;
+  (3) added gradient clipping as a safety net against future divergence,
+  plus an explicit train-accuracy diagnostic with a printed warning if it's
+  at or below chance, so this exact failure mode is caught immediately in
+  future runs instead of requiring someone to notice a suspiciously flat
+  loss log.
+- **Downstream cells updated for consistency**: Integrated Gradients and
+  the MLP's SHAP explainer now both operate on the same scaled inputs the
+  MLP was actually trained on (using the same fitted scaler, not a fresh
+  one per set), and both are wrapped with an explicit `torch.sigmoid()`
+  now that the model outputs raw logits -- keeping IG and SHAP on the same
+  probability scale for a fair comparison.
+
 ## v18 -- 2026-07-29
 
 - **Synopsis updated with the real repo link**

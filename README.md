@@ -101,11 +101,14 @@ run of everything.
 - [x] RQ1 baseline models (LogReg, RF, XGBoost, TabNet) -- confirmed on real data
 - [x] RQ2 SHAP analysis + permutation importance -- confirmed on real data
 - [x] RQ3 nested-CV feature reduction + LASSO cross-check + threshold calibration -- confirmed on real data
-- [ ] RQ4 SHAP vs. TabNet attention vs. MLP control -- code complete and verified via
-      synthetic integration test (full 02->04->05 artifact chain), **not yet run
-      against real SECOM data** -- run it and update this line once confirmed
-- [ ] Exploratory: Isolation Forest anomaly safety net -- code complete and verified
-      via synthetic integration test, **not yet run against real SECOM data**
+- [ ] RQ4 SHAP vs. TabNet attention vs. MLP control -- code fixed after a real bug
+      found on the first real-data run (MLP training divergence from unscaled
+      features -- see CHANGELOG v19); **needs to be re-run** with the fix before
+      any RQ4 numbers can be trusted
+- [x] Exploratory: Isolation Forest anomaly safety net -- confirmed on real data
+      (flagged 17/314 held-out wafers as anomalous; caught 0 of 7 fails the
+      supervised model missed at its tuned threshold -- an honest null result,
+      not a bug)
 - [ ] Final report
 
 ## Versioning
