@@ -14,6 +14,49 @@ See docs/synopsis.docx, "Solution to RQ2" for the full write-up.
 
 import numpy as np
 import pandas as pd
+from scipy.stats import spearmanr
+
+
+def per_instance_agreement(importances_a: np.ndarray, importances_b: np.ndarray, top_k: int = 3) -> dict:
+    """
+    Compares two per-instance feature-importance matrices (same shape:
+    n_instances x n_features), e.g. SHAP values vs. TabNet attention masks,
+    or SHAP values vs. Integrated Gradients attributions (RQ4's stated
+    methodology). For each instance, computes the Spearman rank correlation
+    between the two importance rankings and whether their top-k features
+    fully agree (same set, order-independent).
+
+    Returns per-instance arrays plus summary statistics, so both the mean
+    agreement AND its distribution can be reported (a single mean can hide
+    whether agreement is consistent or highly instance-dependent).
+    """
+    importances_a = np.asarray(importances_a)
+    importances_b = np.asarray(importances_b)
+    if importances_a.shape != importances_b.shape:
+        raise ValueError(
+            f"Shape mismatch: {importances_a.shape} vs {importances_b.shape} -- "
+            "both importance matrices must cover the same instances and features."
+        )
+
+    n_instances, n_features = importances_a.shape
+    correlations = np.zeros(n_instances)
+    top_k_agreement = np.zeros(n_instances, dtype=bool)
+
+    for i in range(n_instances):
+        rho, _ = spearmanr(importances_a[i], importances_b[i])
+        correlations[i] = rho if np.isfinite(rho) else 0.0
+
+        top_a = set(np.argsort(-np.abs(importances_a[i]))[:top_k])
+        top_b = set(np.argsort(-np.abs(importances_b[i]))[:top_k])
+        top_k_agreement[i] = top_a == top_b
+
+    return {
+        "per_instance_correlation": correlations,
+        "per_instance_top_k_agreement": top_k_agreement,
+        "mean_correlation": float(np.mean(correlations)),
+        "median_correlation": float(np.median(correlations)),
+        "top_k_agreement_rate": float(np.mean(top_k_agreement)),
+    }
 
 
 def compute_ale(

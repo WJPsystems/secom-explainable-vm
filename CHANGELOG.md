@@ -7,6 +7,50 @@ each notebook's "Notebook version" marker (in its first cell) exist so you
 can tell, at a glance, whether the copy you're looking at in Colab/GitHub is
 current, without needing to diff files by hand.
 
+## v17 -- 2026-07-29
+
+- **`04` now persists its own results** (`rq3_summary.json`: `final_features`,
+  `watch_list`, `tuned_threshold`, LASSO Jaccard overlap) -- a real gap found
+  while building `05`/`06`: `04` previously saved nothing at all, so neither
+  downstream notebook could have loaded RQ3's actual reduced feature set or
+  tuned threshold even if their own code were otherwise correct.
+- **`05_attention_comparison_rq4.ipynb` built out with real code**: trains
+  TabNet and a class-weighted PyTorch MLP control on RQ3's actual reduced
+  feature set, extracts TabNet's native `.explain()` attention output and
+  the MLP's Integrated Gradients attributions (captum), computes SHAP via
+  `KernelExplainer` for both (neither is a tree model, so `TreeExplainer`
+  doesn't apply), and reports per-instance Spearman agreement + top-3
+  feature-set agreement between each model's SHAP values and its own
+  intrinsic explanation -- RQ4's actual question, answered with real
+  computed numbers instead of a stub.
+- **`06_anomaly_safety_net.ipynb` built out with real code**: fits an
+  Isolation Forest on the full 432-feature set (train portion of the
+  holdout split), scores the held-out test portion, and compares against
+  RQ3's actual reduced model at its actual tuned threshold -- reporting
+  concretely how many real failures the supervised model missed and how
+  many of those the unsupervised safety net still caught.
+- **New `per_instance_agreement()`** in `src/explainability.py`, verified
+  against known-answer cases (identical rankings -> correlation ~1.0 and
+  100% top-k agreement; independent random rankings -> correlation ~0)
+  before use.
+- Verified the full artifact chain end-to-end twice: `02`-save ->
+  `04`-load/save -> `06`-load (Isolation Forest comparison), and
+  `02`-save -> `04`-load/save -> `05`-load (TabNet/MLP/SHAP/IG comparison)
+  -- both using the actual `src/` modules with synthetic data, not mocks.
+  **Neither `05` nor `06` has been run against the real SECOM dataset yet**
+  -- that confirmation is still outstanding (see README Status).
+- **Synopsis (`docs/synopsis.docx`) updated with a new "Preliminary
+  Results" section**, reporting real RQ1/RQ2/RQ3 findings (model comparison
+  table, SHAP vs. permutation importance top-10 with real values and their
+  2/10 overlap, feature stability table, and the full-vs-reduced comparison
+  at both the default and tuned thresholds) in place of the
+  planned-methodology framing alone.
+- README status checklist updated to reflect what's actually confirmed on
+  real data (`01`-`04`) versus what's code-complete but synthetic-tested
+  only (`05`/`06`) -- deliberately not marked complete until run for real,
+  per the same "verify before claiming done" discipline used throughout
+  this project.
+
 ## v16 -- 2026-07-29
 
 - **Threshold calibration implemented** (Step 5 in `04_feature_reduction_rq3.ipynb`),

@@ -11,5 +11,6 @@ seaborn>=0.13
 jupyter>=1.0
 nbconvert>=7.0
 pytorch-tabnet>=4.1
+torch>=2.0
 captum>=0.7
 scipy>=1.11

@@ -96,13 +96,16 @@ run of everything.
 
 ## Status
 
-- [x] Synopsis drafted, pending mentor review
-- [ ] Data screening complete
-- [ ] RQ1 baseline models (LogReg, RF, XGBoost, TabNet)
-- [ ] RQ2 SHAP analysis
-- [ ] RQ3 nested-CV feature reduction + LASSO cross-check
-- [ ] RQ4 SHAP vs. TabNet attention vs. MLP control
-- [ ] Exploratory: Isolation Forest anomaly safety net
+- [x] Synopsis drafted, mentor-reviewed, Preliminary Results section added with real data
+- [x] Data screening complete (confirmed on real SECOM data, multiple runs)
+- [x] RQ1 baseline models (LogReg, RF, XGBoost, TabNet) -- confirmed on real data
+- [x] RQ2 SHAP analysis + permutation importance -- confirmed on real data
+- [x] RQ3 nested-CV feature reduction + LASSO cross-check + threshold calibration -- confirmed on real data
+- [ ] RQ4 SHAP vs. TabNet attention vs. MLP control -- code complete and verified via
+      synthetic integration test (full 02->04->05 artifact chain), **not yet run
+      against real SECOM data** -- run it and update this line once confirmed
+- [ ] Exploratory: Isolation Forest anomaly safety net -- code complete and verified
+      via synthetic integration test, **not yet run against real SECOM data**
 - [ ] Final report
 
 ## Versioning
