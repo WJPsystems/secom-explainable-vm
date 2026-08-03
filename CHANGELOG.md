@@ -7,6 +7,29 @@ each notebook's "Notebook version" marker (in its first cell) exist so you
 can tell, at a glance, whether the copy you're looking at in Colab/GitHub is
 current, without needing to diff files by hand.
 
+## v18 -- 2026-07-29
+
+- **Synopsis updated with the real repo link**
+  (https://github.com/WJPsystems/secom-explainable-vm/tree/main), replacing
+  the "link to be added" placeholder in the Open Access paragraph.
+- **Figure 1's folder tree was stale** (still showed `.gitkeep` instead of
+  `PLACEHOLDER.md`, missing `data/artifacts/`, `00_run_all.ipynb`,
+  `artifacts.py`, `CHANGELOG.md`) -- refreshed to match the actual current
+  repository structure.
+- **Open Access paragraph rewritten to be honest about current state**:
+  previously claimed "the cleaned dataset... are published," which wasn't
+  accurate -- `data/raw/`, `data/model_ready/`, and `data/artifacts/`
+  contain placeholder files, not the actual generated data, since Colab
+  sessions are ephemeral and nothing syncs back to GitHub automatically.
+  Now states this explicitly rather than overclaiming reproducibility that
+  doesn't exist yet.
+- **Added a real fix, not just a disclosure**: `00_run_all.ipynb` now has a
+  final step that zips up everything actually generated in `data/raw/`,
+  `data/model_ready/`, and `data/artifacts/` (excluding the placeholder
+  files themselves) and triggers a download, so the real data/artifacts can
+  be uploaded to GitHub after a run -- tested the filtering logic directly
+  (real files included, placeholders correctly excluded) before shipping.
+
 ## v17 -- 2026-07-29
 
 - **`04` now persists its own results** (`rq3_summary.json`: `final_features`,
