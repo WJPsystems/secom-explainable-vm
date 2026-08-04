@@ -7,6 +7,30 @@ each notebook's "Notebook version" marker (in its first cell) exist so you
 can tell, at a glance, whether the copy you're looking at in Colab/GitHub is
 current, without needing to diff files by hand.
 
+## v23 -- 2026-08-02
+
+- **Real gap found via audit, not a new-run failure**: `imbalanced-learn`
+  sat in `requirements.txt` completely unused -- traced back to the
+  synopsis's own RQ1 methodology and `02`'s own markdown both claiming a
+  SMOTE robustness check "runs below," when no such code ever existed.
+  Full cross-check of every third-party import across all notebooks and
+  `src/*.py` against `requirements.txt` confirmed this was the only real
+  gap; everything else validated correctly.
+- **Implemented a scoped SMOTE robustness check** in `02_modeling_rq1.ipynb`,
+  applied to the single best-performing tree model only (not all four
+  models, to avoid doubling an already-long CV pass), resampling only each
+  fold's training split (never the held-out fold, to avoid leakage).
+  Verified the full flow end-to-end on synthetic SECOM-shaped data,
+  including confirming `best_tree` resolves dynamically to whichever model
+  actually wins (tested with a case where that's XGBoost, not just the
+  real run's RandomForest) before wiring it into the real notebook.
+- **Synopsis's RQ1 methodology text corrected** to accurately describe the
+  scoped (single-model) SMOTE check, rather than implying it ran across
+  all four models -- the previous wording was the actual source of the gap.
+- Not yet run against real SECOM data -- the actual numeric result (does
+  SMOTE fix the threshold-collapse problem class-weighting alone left
+  unresolved?) is still outstanding.
+
 ## v22 -- 2026-08-02
 
 - **Synopsis updated with the Isolation Forest robustness check's real
