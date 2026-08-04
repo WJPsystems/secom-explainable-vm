@@ -7796,13 +7796,13 @@ a.anchor-link {
 <!-- End of mermaid configuration --></head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
 <main>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a4bd0588">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7bda27b3">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="03---RQ2:-SHAP-Feature-Importance">03 - RQ2: SHAP Feature Importance<a class="anchor-link" href="#03---RQ2:-SHAP-Feature-Importance">¶</a></h1><p><strong>Notebook version:</strong> v20 -- 2026-08-02</p>
+<h1 id="03---RQ2:-SHAP-Feature-Importance">03 - RQ2: SHAP Feature Importance<a class="anchor-link" href="#03---RQ2:-SHAP-Feature-Importance">¶</a></h1><p><strong>Notebook version:</strong> v24 -- 2026-08-02</p>
 <ul>
 <li>Apply TreeExplainer SHAP to the best RQ1 model</li>
 <li>Rank features by mean |SHAP value|</li>
@@ -7819,7 +7819,7 @@ why LIME was set aside (<code>src/feature_selection.py</code> docstring covers P
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=fa79f8e0">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=787e5fc5">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7900,14 +7900,14 @@ why LIME was set aside (<code>src/feature_selection.py</code> docstring covers P
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>Colab setup complete. Working directory: /content/secom-explainable-vm/notebooks
 Skipped pip install -- already done earlier this session. git pull always ran above.
-Repo commit: 65c0211 2026-08-03 11:40:23 -0400
+Repo commit: b108370 2026-08-03 23:56:30 -0400
 Compare this commit hash against GitHub's latest commit to confirm you're current.
 </pre>
 </div>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=4d62e2fa">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=0ab85da9">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7970,20 +7970,14 @@ Compare this commit hash against GitHub's latest commit to confirm you're curren
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>Dropped 32 columns exceeding 40% missingness.
 Dropped 126 near-zero-variance columns (threshold=1e-06).
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Loaded RQ1's best tree ensemble: RandomForest
+Loaded RQ1's best tree ensemble: RandomForest
 </pre>
 </div>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e3e0fd68">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f4d50976">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7993,7 +7987,7 @@ Dropped 126 near-zero-variance columns (threshold=1e-06).
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=9959880e">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=bf430aac">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8039,7 +8033,7 @@ dtype: float64
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f191161e">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c9fdcade">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8049,7 +8043,7 @@ dtype: float64
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=3c808b43">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=ce680d8a">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8112,7 +8106,7 @@ Overlap with SHAP top-10: 2/10
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=d5b3d7ae">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=35d67fb1">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8125,7 +8119,7 @@ Partial Dependence Plots because ALE stays unbiased under correlated features
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=0775fa80">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=57e6d0d2">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8227,7 +8221,7 @@ ALE curve for Sensor_34:
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=c3da2aca">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=ffb4701a">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8264,7 +8258,7 @@ ALE curve for Sensor_34:
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=fcbe79f5">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=93de7411">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8280,7 +8274,7 @@ together in the capstone write-up as the RQ2 deliverable</li>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=9b125581">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=8c440f7e">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8290,7 +8284,7 @@ together in the capstone write-up as the RQ2 deliverable</li>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=b61ce782">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=31377e95">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>

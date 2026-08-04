@@ -7796,13 +7796,13 @@ a.anchor-link {
 <!-- End of mermaid configuration --></head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
 <main>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=78885eb2">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=1c78d049">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="01---Data-Screening">01 - Data Screening<a class="anchor-link" href="#01---Data-Screening">¶</a></h1><p><strong>Notebook version:</strong> v20 -- 2026-08-02</p>
+<h1 id="01---Data-Screening">01 - Data Screening<a class="anchor-link" href="#01---Data-Screening">¶</a></h1><p><strong>Notebook version:</strong> v24 -- 2026-08-02</p>
 <p>Load raw SECOM data, inspect missingness/variance, and build the data dictionary.</p>
 <p>The first call to <code>load_raw()</code> below will automatically download the raw SECOM
 data from the UCI Machine Learning Repository into <code>data/raw/</code> if it isn't
@@ -7811,7 +7811,7 @@ internet access and may take a few seconds the first time.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=4f3e08f7">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=a6bc6f1d">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7892,14 +7892,14 @@ internet access and may take a few seconds the first time.</p>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>Colab setup complete. Working directory: /content/secom-explainable-vm/notebooks
 Skipped pip install -- already done earlier this session. git pull always ran above.
-Repo commit: 65c0211 2026-08-03 11:40:23 -0400
+Repo commit: b108370 2026-08-03 23:56:30 -0400
 Compare this commit hash against GitHub's latest commit to confirm you're current.
 </pre>
 </div>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=60ce0f92">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=6c029a58">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7986,7 +7986,7 @@ Compare this commit hash against GitHub's latest commit to confirm you're curren
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a6cf2e0b">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=409d9a26">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7996,7 +7996,7 @@ Compare this commit hash against GitHub's latest commit to confirm you're curren
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=fb302356">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=1922ad70">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8041,6 +8041,10 @@ Compare this commit hash against GitHub's latest commit to confirm you're curren
 </thead>
 <tbody>
 <tr>
+<th>Sensor_158</th>
+<td>0.911934</td>
+</tr>
+<tr>
 <th>Sensor_293</th>
 <td>0.911934</td>
 </tr>
@@ -8053,15 +8057,7 @@ Compare this commit hash against GitHub's latest commit to confirm you're curren
 <td>0.911934</td>
 </tr>
 <tr>
-<th>Sensor_158</th>
-<td>0.911934</td>
-</tr>
-<tr>
 <th>Sensor_493</th>
-<td>0.855775</td>
-</tr>
-<tr>
-<th>Sensor_86</th>
 <td>0.855775</td>
 </tr>
 <tr>
@@ -8073,11 +8069,23 @@ Compare this commit hash against GitHub's latest commit to confirm you're curren
 <td>0.855775</td>
 </tr>
 <tr>
-<th>Sensor_245</th>
-<td>0.649649</td>
+<th>Sensor_86</th>
+<td>0.855775</td>
 </tr>
 <tr>
 <th>Sensor_518</th>
+<td>0.649649</td>
+</tr>
+<tr>
+<th>Sensor_519</th>
+<td>0.649649</td>
+</tr>
+<tr>
+<th>Sensor_384</th>
+<td>0.649649</td>
+</tr>
+<tr>
+<th>Sensor_112</th>
 <td>0.649649</td>
 </tr>
 <tr>
@@ -8086,10 +8094,6 @@ Compare this commit hash against GitHub's latest commit to confirm you're curren
 </tr>
 <tr>
 <th>Sensor_247</th>
-<td>0.649649</td>
-</tr>
-<tr>
-<th>Sensor_384</th>
 <td>0.649649</td>
 </tr>
 <tr>
@@ -8105,19 +8109,15 @@ Compare this commit hash against GitHub's latest commit to confirm you're curren
 <td>0.649649</td>
 </tr>
 <tr>
-<th>Sensor_112</th>
-<td>0.649649</td>
-</tr>
-<tr>
 <th>Sensor_111</th>
 <td>0.649649</td>
 </tr>
 <tr>
-<th>Sensor_517</th>
+<th>Sensor_245</th>
 <td>0.649649</td>
 </tr>
 <tr>
-<th>Sensor_519</th>
+<th>Sensor_517</th>
 <td>0.649649</td>
 </tr>
 </tbody>
@@ -8127,7 +8127,7 @@ Compare this commit hash against GitHub's latest commit to confirm you're curren
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=b7e7e9d7">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=3e511629">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8172,35 +8172,43 @@ Compare this commit hash against GitHub's latest commit to confirm you're curren
 </thead>
 <tbody>
 <tr>
-<th>Sensor_506</th>
+<th>Sensor_43</th>
 <td>0.0</td>
 </tr>
 <tr>
-<th>Sensor_507</th>
+<th>Sensor_50</th>
 <td>0.0</td>
 </tr>
 <tr>
-<th>Sensor_508</th>
+<th>Sensor_6</th>
 <td>0.0</td>
 </tr>
 <tr>
-<th>Sensor_509</th>
+<th>Sensor_531</th>
 <td>0.0</td>
 </tr>
 <tr>
-<th>Sensor_326</th>
+<th>Sensor_529</th>
 <td>0.0</td>
 </tr>
 <tr>
-<th>Sensor_510</th>
+<th>Sensor_530</th>
 <td>0.0</td>
 </tr>
 <tr>
-<th>Sensor_285</th>
+<th>Sensor_70</th>
 <td>0.0</td>
 </tr>
 <tr>
-<th>Sensor_258</th>
+<th>Sensor_53</th>
+<td>0.0</td>
+</tr>
+<tr>
+<th>Sensor_532</th>
+<td>0.0</td>
+</tr>
+<tr>
+<th>Sensor_539</th>
 <td>0.0</td>
 </tr>
 <tr>
@@ -8220,35 +8228,27 @@ Compare this commit hash against GitHub's latest commit to confirm you're curren
 <td>0.0</td>
 </tr>
 <tr>
-<th>Sensor_262</th>
+<th>Sensor_534</th>
 <td>0.0</td>
 </tr>
 <tr>
-<th>Sensor_261</th>
+<th>Sensor_533</th>
 <td>0.0</td>
 </tr>
 <tr>
-<th>Sensor_260</th>
+<th>Sensor_505</th>
 <td>0.0</td>
 </tr>
 <tr>
-<th>Sensor_259</th>
+<th>Sensor_499</th>
 <td>0.0</td>
 </tr>
 <tr>
-<th>Sensor_539</th>
+<th>Sensor_504</th>
 <td>0.0</td>
 </tr>
 <tr>
-<th>Sensor_514</th>
-<td>0.0</td>
-</tr>
-<tr>
-<th>Sensor_513</th>
-<td>0.0</td>
-</tr>
-<tr>
-<th>Sensor_529</th>
+<th>Sensor_503</th>
 <td>0.0</td>
 </tr>
 </tbody>
@@ -8258,7 +8258,7 @@ Compare this commit hash against GitHub's latest commit to confirm you're curren
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=4cecbe12">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=9f8ea27a">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8400,7 +8400,7 @@ Compare this commit hash against GitHub's latest commit to confirm you're curren
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=489a6c9e">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=adcda9e3">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8411,7 +8411,7 @@ Adjust and document the final thresholds used in the capstone report.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=6cffc657">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=d40aa619">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8443,7 +8443,7 @@ Remaining features: 432 (from 590)
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=71b02f0d">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=aa5f1700">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8463,7 +8463,7 @@ alongside the index-based split already used everywhere else.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=c8d85537">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=279a0856">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8504,7 +8504,7 @@ Populated data/model_ready/: X_train.csv, X_test.csv, y_train.csv, y_test.csv
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=9df73a5b">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=97c988b2">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8518,7 +8518,7 @@ Populated data/model_ready/: X_train.csv, X_test.csv, y_train.csv, y_test.csv
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=2e340155">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=6c58782d">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8528,7 +8528,7 @@ Populated data/model_ready/: X_train.csv, X_test.csv, y_train.csv, y_test.csv
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=4ed4e72d">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=b49f8354">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
