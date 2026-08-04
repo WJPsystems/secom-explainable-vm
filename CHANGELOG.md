@@ -7,6 +7,40 @@ each notebook's "Notebook version" marker (in its first cell) exist so you
 can tell, at a glance, whether the copy you're looking at in Colab/GitHub is
 current, without needing to diff files by hand.
 
+## v25 -- 2026-08-02
+
+- **v24's SMOTE robustness check confirmed run against real SECOM data.**
+  Verified directly from GitHub's hosted HTML exports (not just a chat
+  upload) after an initial mismatch turned out to be a stale local file,
+  not a repo problem -- see resolution below. Real result: SMOTE barely
+  moves the needle over class weighting (recall 0.0 -> 0.0096, BER 0.500 ->
+  0.496, AUC-ROC 0.7123 -> 0.7208) -- a genuine null result, not a bug,
+  suggesting the threshold-collapse problem is not specific to class
+  weighting and that SMOTE's nearest-neighbor interpolation likely suffers
+  from the curse of dimensionality at 432 features.
+- **Resolved an apparent version mismatch**: a chat-uploaded HTML export
+  showed a stale v20 marker with no SMOTE code, while the user had
+  confirmed v24 on GitHub. Cloned the actual repo directly (including the
+  new `docs/all_notebook_exports/` folder) and confirmed all six notebooks
+  there are genuinely v24 with the real SMOTE implementation present and
+  executed -- the uploaded file was stale (a local, unsynced copy), not a
+  repo issue. Correcting this in the record since I initially and
+  incorrectly told the user their run was stale when it was the chat
+  upload that was.
+- **Fixed a real gap in `01_data_screening.ipynb`**: the synopsis's
+  screenshot placeholder specifically asked for `X.info()`/`X.head()`
+  output, but the notebook never actually called either -- only
+  `X.shape`/`y.value_counts()`. Added two new cells (`X.info()`, `X.head()`)
+  immediately after the data-load cell so the promised screenshot content
+  genuinely exists.
+- **Synopsis updated**: SMOTE robustness check results added to the RQ1
+  Results section (Table 3b); Figure 1's folder tree refreshed to show the
+  actual real files now present in `data/raw/`, `data/model_ready/`,
+  `data/artifacts/`, and the new `docs/all_notebook_exports/` folder; Open
+  Access paragraph updated to confirm real data/artifacts are now present
+  (fulfilling the v18 note that promised this update once true); screenshot
+  placeholder text updated to point at the exact new cells.
+
 ## v24 -- 2026-08-02
 
 - **Real bug from v23's first run: `NameError: name 'best_tree' is not
