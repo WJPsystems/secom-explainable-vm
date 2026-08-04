@@ -7,6 +7,23 @@ each notebook's "Notebook version" marker (in its first cell) exist so you
 can tell, at a glance, whether the copy you're looking at in Colab/GitHub is
 current, without needing to diff files by hand.
 
+## v24 -- 2026-08-02
+
+- **Real bug from v23's first run: `NameError: name 'best_tree' is not
+  defined`** in the new SMOTE cell. Root cause: `best_tree` is actually
+  defined inside the later "Save results for downstream notebooks" cell,
+  but the SMOTE cell (which needs it) was placed *before* that cell in
+  notebook order -- an ordering mistake introduced when the SMOTE cell was
+  added, not caught before shipping because it was only tested with
+  `best_tree` pre-defined in the test scaffolding rather than mimicking the
+  real notebook's cell order exactly.
+- **Fixed by computing `best_tree` locally within the SMOTE cell** from
+  `results_df` (which genuinely is available at that point), rather than
+  reordering cells or depending on a later cell's definition -- makes the
+  SMOTE check self-contained regardless of what runs around it. Verified by
+  re-running the exact failure scenario (`results_df` defined, `best_tree`
+  deliberately NOT pre-defined) and confirming no `NameError` this time.
+
 ## v23 -- 2026-08-02
 
 - **Real gap found via audit, not a new-run failure**: `imbalanced-learn`
