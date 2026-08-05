@@ -7,7 +7,7 @@ each notebook's "Notebook version" marker (in its first cell) exist so you
 can tell, at a glance, whether the copy you're looking at in Colab/GitHub is
 current, without needing to diff files by hand.
 
-## v25 -- 2026-08-02
+## v25 -- 2026-08-04
 
 - **v24's SMOTE robustness check confirmed run against real SECOM data.**
   Verified directly from GitHub's hosted HTML exports (not just a chat
